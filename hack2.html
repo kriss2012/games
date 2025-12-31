@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quick Code Breaker - Raisoni Mela 2026</title>
+    <style>
+        :root {
+            --color-matrix: #00ff41;
+            --color-bg: #0a0a0a;
+            --color-surface: #1a1a1a;
+            --color-neon: #00ff41;
+            --color-red: #ff0040;
+            --color-gold: #ffd700;
+            --font-mono: 'Courier New', monospace;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+        }
+
+        body {
+            background: var(--color-bg);
+            color: var(--color-neon);
+            font-family: var(--font-mono);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .container {
+            background: rgba(0, 0, 0, 0.95);
+            border: 2px solid var(--color-neon);
+            border-radius: 12px;
+            padding: 15px;
+            width: 100%;
+            max-width: 520px;
+            z-index: 10;
+            position: relative;
+            box-shadow: 0 0 30px rgba(0, 255, 65, 0.3);
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 12px;
+            }
+        }
+
+        @media (min-width: 600px) {
+            .container {
+                padding: 25px;
+            }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .header h1 {
+            font-size: 20px;
+            color: var(--color-gold);
+            margin-bottom: 6px;
+            text-shadow: 0 0 20px var(--color-gold);
+            font-weight: bold;
+        }
+
+        @media (min-width: 600px) {
+            .header h1 {
+                font-size: 28px;
+                margin-bottom: 8px;
+            }
+        }
+
+        .mela-badge {
+            background: var(--color-red);
+            color: white;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 10px;
+            display: inline-block;
+            margin-top: 6px;
+            font-weight: bold;
+        }
+
+        .game-area {
+            background: rgba(26, 26, 26, 0.8);
+            border: 1px solid var(--color-neon);
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 15px;
+        }
+
+        @media (min-width: 600px) {
+            .game-area {
+                padding: 18px;
+                margin-bottom: 20px;
+            }
+        }
+
+        .code-display {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
+            margin-bottom: 12px;
+            justify-items: center;
+        }
+
+        @media (min-width: 600px) {
+            .code-display {
+                gap: 10px;
+                margin-bottom: 16px;
+            }
+        }
+
+        .code-slot {
+            width: 40px;
+            height: 40px;
+            border: 2px solid var(--color-neon);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: bold;
+            background: rgba(0, 255, 65, 0.1);
+            transition: all 0.3s ease;
+            color: var(--color-neon);
+        }
+
+        @media (min-width: 600px) {
+            .code-slot {
+                width: 55px;
+                height: 55px;
+                font-size: 22px;
+                border-radius: 8px;
+            }
+        }
+
+        .code-slot.guessed { 
+            box-shadow: 0 0 20px var(--color-neon); 
+            background: rgba(0, 255, 65, 0.25);
+        }
+
+        .feedback {
+            min-height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: var(--color-neon);
+            background: rgba(0, 255, 65, 0.12);
+            border-radius: 6px;
+            border: 1px solid rgba(0, 255, 65, 0.4);
+            flex-wrap: wrap;
+            padding: 6px;
+        }
+
+        @media (min-width: 600px) {
+            .feedback {
+                font-size: 16px;
+                min-height: 45px;
+                margin-bottom: 14px;
+                padding: 8px;
+            }
+        }
+
+        .numpad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+            margin-bottom: 10px;
+        }
+
+        @media (min-width: 600px) {
+            .numpad {
+                gap: 8px;
+                margin-bottom: 14px;
+            }
+        }
+
+        .num-btn {
+            padding: 10px 6px;
+            background: rgba(0, 255, 65, 0.2);
+            border: 1px solid var(--color-neon);
+            color: var(--color-neon);
+            font-family: var(--font-mono);
+            font-size: 12px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        @media (min-width: 600px) {
+            .num-btn {
+                padding: 14px 10px;
+                font-size: 15px;
+                border-radius: 8px;
+            }
+        }
+
+        .num-btn:hover:not(:disabled) { 
+            background: var(--color-neon); 
+            color: #000; 
+            box-shadow: 0 0 15px var(--color-neon); 
+        }
+
+        .num-btn:active:not(:disabled) { transform: scale(0.92); }
+
+        .num-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .num-btn-enter {
+            background: var(--color-gold);
+            color: #000;
+            font-weight: bold;
+            margin-bottom: 6px;
+        }
+
+        .num-btn-enter:hover:not(:disabled) {
+            background: #ffed4e;
+            box-shadow: 0 0 15px var(--color-gold);
+        }
+
+        .num-btn-clear {
+            background: rgba(255, 0, 64, 0.25);
+            color: var(--color-red);
+            border: 1px solid var(--color-red);
+        }
+
+        .num-btn-clear:hover:not(:disabled) {
+            background: rgba(255, 0, 64, 0.35);
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 12px;
+            padding: 10px;
+            background: rgba(0, 255, 65, 0.12);
+            border-radius: 8px;
+            border: 1px solid var(--color-neon);
+            gap: 8px;
+        }
+
+        @media (min-width: 600px) {
+            .stats {
+                padding: 14px;
+                margin-bottom: 16px;
+                gap: 12px;
+            }
+        }
+
+        .stat { 
+            text-align: center;
+            flex: 1;
+        }
+
+        .stat-label { 
+            font-size: 9px; 
+            opacity: 0.75;
+            margin-bottom: 3px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        @media (min-width: 600px) {
+            .stat-label {
+                font-size: 11px;
+                margin-bottom: 4px;
+            }
+        }
+
+        .stat-value { 
+            font-size: 16px; 
+            font-weight: bold; 
+            color: var(--color-gold); 
+        }
+
+        @media (min-width: 600px) {
+            .stat-value {
+                font-size: 22px;
+            }
+        }
+
+        .timer { 
+            color: var(--color-red); 
+            text-shadow: 0 0 8px var(--color-red);
+            font-weight: bold;
+        }
+
+        .timer.warning { animation: pulse 0.5s infinite; }
+
+        @keyframes pulse { 
+            0%, 100% { opacity: 1; } 
+            50% { opacity: 0.5; } 
+        }
+
+        .controls { 
+            display: flex; 
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        @media (min-width: 600px) {
+            .controls {
+                gap: 10px;
+                margin-bottom: 16px;
+            }
+        }
+
+        .btn {
+            flex: 1;
+            padding: 9px;
+            border: none;
+            border-radius: 6px;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        @media (min-width: 600px) {
+            .btn {
+                padding: 11px;
+                font-size: 13px;
+                border-radius: 8px;
+            }
+        }
+
+        .btn-primary { 
+            background: var(--color-neon); 
+            color: #000; 
+        }
+
+        .btn-primary:hover:not(:disabled) { 
+            box-shadow: 0 0 20px var(--color-neon); 
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary { 
+            background: rgba(255, 0, 64, 0.2); 
+            color: var(--color-red); 
+            border: 1px solid var(--color-red); 
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: rgba(255, 0, 64, 0.3);
+            box-shadow: 0 0 15px rgba(255, 0, 64, 0.5);
+        }
+
+        .btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .leaderboard {
+            background: rgba(0, 255, 65, 0.12);
+            border: 1px solid var(--color-neon);
+            border-radius: 8px;
+            padding: 10px;
+            margin-top: 12px;
+            max-height: 180px;
+            overflow-y: auto;
+        }
+
+        @media (min-width: 600px) {
+            .leaderboard {
+                padding: 12px;
+                margin-top: 14px;
+                max-height: 200px;
+            }
+        }
+
+        .leaderboard h3 { 
+            font-size: 11px; 
+            margin-bottom: 8px;
+            color: var(--color-gold);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        @media (min-width: 600px) {
+            .leaderboard h3 {
+                font-size: 13px;
+                margin-bottom: 10px;
+            }
+        }
+
+        .leaderboard-list { 
+            list-style: none; 
+            font-size: 10px; 
+        }
+
+        @media (min-width: 600px) {
+            .leaderboard-list {
+                font-size: 12px;
+            }
+        }
+
+        .leaderboard-item { 
+            display: flex; 
+            justify-content: space-between; 
+            padding: 5px 0;
+            border-bottom: 1px solid rgba(0, 255, 65, 0.2);
+            align-items: center;
+        }
+
+        @media (min-width: 600px) {
+            .leaderboard-item {
+                padding: 6px 0;
+            }
+        }
+
+        .leaderboard-item:last-child {
+            border-bottom: none;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.97);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            padding: 15px;
+            overflow-y: auto;
+        }
+
+        .modal.active { display: flex; }
+
+        .modal-content {
+            background: var(--color-surface);
+            border: 2px solid var(--color-gold);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            max-width: 100%;
+            width: 100%;
+            animation: slideUp 0.3s ease;
+        }
+
+        @media (min-width: 600px) {
+            .modal-content {
+                max-width: 380px;
+                padding: 28px;
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal h2 {
+            font-size: 22px;
+            color: var(--color-gold);
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px var(--color-gold);
+        }
+
+        @media (min-width: 600px) {
+            .modal h2 {
+                font-size: 30px;
+                margin-bottom: 12px;
+            }
+        }
+
+        .modal p {
+            color: var(--color-neon);
+            margin-bottom: 12px;
+            font-size: 12px;
+        }
+
+        @media (min-width: 600px) {
+            .modal p {
+                font-size: 15px;
+                margin-bottom: 16px;
+            }
+        }
+
+        .input-group {
+            margin-bottom: 14px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--color-neon);
+            border-radius: 6px;
+            font-size: 12px;
+            background: var(--color-bg);
+            color: var(--color-neon);
+            font-family: var(--font-mono);
+        }
+
+        @media (min-width: 600px) {
+            .input-group input {
+                padding: 11px;
+                font-size: 14px;
+                border-radius: 8px;
+            }
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: var(--color-gold);
+            box-shadow: 0 0 15px var(--color-gold);
+        }
+
+        .input-group input::placeholder {
+            opacity: 0.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔓 CODE BREAKER</h1>
+            <div class="mela-badge">Raisoni Mela 2026</div>
+        </div>
+
+        <div class="game-area">
+            <div class="code-display" id="codeDisplay">
+                <div class="code-slot" id="slot1">-</div>
+                <div class="code-slot" id="slot2">-</div>
+                <div class="code-slot" id="slot3">-</div>
+                <div class="code-slot" id="slot4">-</div>
+            </div>
+
+            <div class="feedback" id="feedback">Enter 4-digit PIN!</div>
+
+            <div class="numpad">
+                <button class="num-btn" data-val="1">1</button>
+                <button class="num-btn" data-val="2">2</button>
+                <button class="num-btn" data-val="3">3</button>
+                <button class="num-btn" data-val="4">4</button>
+                <button class="num-btn" data-val="5">5</button>
+                <button class="num-btn" data-val="6">6</button>
+                <button class="num-btn" data-val="7">7</button>
+                <button class="num-btn" data-val="8">8</button>
+                <button class="num-btn" data-val="9">9</button>
+                <button class="num-btn" data-val="0" style="grid-column: span 3;">0</button>
+            </div>
+
+            <button class="num-btn num-btn-enter" id="enterBtn" style="width: 100%;">ENTER</button>
+            <button class="num-btn num-btn-clear" id="clearBtn" style="width: 100%;">CLEAR</button>
+        </div>
+
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-label">Score</div>
+                <div class="stat-value" id="scoreDisplay">0</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">Tries</div>
+                <div class="stat-value" id="guessDisplay">0/5</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">Time</div>
+                <div class="stat-value timer" id="timerDisplay">60s</div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="btn btn-primary" id="startBtn">START</button>
+            <button class="btn btn-secondary" id="resetBtn">RESET</button>
+        </div>
+
+        <div class="leaderboard">
+            <h3>🏆 TOP HACKERS</h3>
+            <ul class="leaderboard-list" id="leaderboardList"></ul>
+        </div>
+    </div>
+
+    <div class="modal" id="gameOverModal">
+        <div class="modal-content">
+            <h2 id="finalScore">0</h2>
+            <p id="resultMessage">Game Over</p>
+            <div class="input-group">
+                <input type="text" id="playerName" placeholder="Your name (max 12)">
+            </div>
+            <button class="btn btn-primary" id="saveScoreBtn" style="width: 100%;">SAVE</button>
+        </div>
+    </div>
+
+    <script>
+        let gameState = {
+            running: false,
+            countdownActive: false,
+            timeLeft: 60,
+            score: 0,
+            guesses: 0,
+            maxGuesses: 5,
+            secretCode: [],
+            currentGuess: [],
+            gameStartTime: null,
+            countdownValue: 3,
+            countdownStartTime: null,
+        };
+
+        const gameConfig = { timeLimit: 60 };
+
+        function generateSecretCode() {
+            gameState.secretCode = [];
+            for(let i = 0; i < 4; i++) {
+                gameState.secretCode.push(Math.floor(Math.random() * 10));
+            }
+        }
+
+        document.querySelectorAll('.num-btn[data-val]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (!gameState.running || gameState.currentGuess.length >= 4 || gameState.guesses >= gameState.maxGuesses) return;
+                gameState.currentGuess.push(parseInt(btn.dataset.val));
+                updateCodeDisplay();
+                playSound('type');
+            });
+        });
+
+        document.getElementById('clearBtn').addEventListener('click', () => {
+            if (!gameState.running) return;
+            gameState.currentGuess = [];
+            updateCodeDisplay();
+            document.getElementById('feedback').textContent = 'Enter 4-digit PIN!';
+        });
+
+        document.getElementById('enterBtn').addEventListener('click', checkGuess);
+
+        function updateCodeDisplay() {
+            ['slot1', 'slot2', 'slot3', 'slot4'].forEach((id, i) => {
+                const slot = document.getElementById(id);
+                slot.textContent = gameState.currentGuess[i] !== undefined ? gameState.currentGuess[i] : '-';
+                slot.classList.toggle('guessed', gameState.currentGuess.length === 4);
+            });
+        }
+
+        function checkGuess() {
+            if (!gameState.running || gameState.currentGuess.length !== 4) return;
+
+            gameState.guesses++;
+            const feedback = getFeedback(gameState.secretCode, gameState.currentGuess);
+            const correctPos = feedback.filter(f => f === 1).length;
+            const wrongPos = feedback.filter(f => f === 2).length;
+
+            let feedbackText = '';
+            for(let i = 0; i < correctPos; i++) feedbackText += '🟢 ';
+            for(let i = 0; i < wrongPos; i++) feedbackText += '🟡 ';
+            if(correctPos === 0 && wrongPos === 0) feedbackText = '❌ Wrong!';
+
+            document.getElementById('feedback').textContent = feedbackText || '❌ No match!';
+
+            const speedBonus = gameState.timeLeft * 2;
+            const accuracyBonus = (correctPos * 50) + (wrongPos * 20);
+            const efficiency = Math.max(0, 100 - (gameState.guesses * 15));
+            gameState.score += Math.floor((speedBonus + accuracyBonus) * (efficiency / 100));
+
+            updateDisplay();
+
+            if (correctPos === 4) {
+                gameState.score += 500;
+                playSound('win');
+                setTimeout(() => endGame('🔓 CRACKED!'), 500);
+                return;
+            }
+
+            if (gameState.guesses >= gameState.maxGuesses) {
+                playSound('lose');
+                setTimeout(() => endGame('💥 GAME OVER!'), 500);
+                return;
+            }
+
+            gameState.currentGuess = [];
+            updateCodeDisplay();
+            playSound('error');
+        }
+
+        function getFeedback(secret, guess) {
+            const feedback = [0, 0, 0, 0];
+            const secretCopy = [...secret];
+
+            for(let i = 0; i < 4; i++) {
+                if (guess[i] === secret[i]) {
+                    feedback[i] = 1;
+                    secretCopy[i] = -1;
+                }
+            }
+
+            for(let i = 0; i < 4; i++) {
+                if (feedback[i] === 0) {
+                    const idx = secretCopy.indexOf(guess[i]);
+                    if (idx !== -1) {
+                        feedback[i] = 2;
+                        secretCopy[idx] = -1;
+                    }
+                }
+            }
+
+            return feedback;
+        }
+
+        function playSound(type) {
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = audioContext.createOscillator();
+                const gain = audioContext.createGain();
+
+                osc.connect(gain);
+                gain.connect(audioContext.destination);
+
+                if (type === 'type') {
+                    osc.frequency.value = 600;
+                    gain.gain.setValueAtTime(0.1, audioContext.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.05);
+                    osc.start(audioContext.currentTime);
+                    osc.stop(audioContext.currentTime + 0.05);
+                } else if (type === 'error') {
+                    osc.frequency.value = 300;
+                    gain.gain.setValueAtTime(0.1, audioContext.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+                    osc.start(audioContext.currentTime);
+                    osc.stop(audioContext.currentTime + 0.2);
+                } else if (type === 'win') {
+                    osc.frequency.value = 1200;
+                    gain.gain.setValueAtTime(0.15, audioContext.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+                    osc.start(audioContext.currentTime);
+                    osc.stop(audioContext.currentTime + 0.3);
+                } else if (type === 'lose') {
+                    osc.frequency.value = 200;
+                    gain.gain.setValueAtTime(0.1, audioContext.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.4);
+                    osc.start(audioContext.currentTime);
+                    osc.stop(audioContext.currentTime + 0.4);
+                }
+            } catch (e) {}
+        }
+
+        function startCountdown() {
+            generateSecretCode();
+            gameState.countdownActive = true;
+            gameState.countdownValue = 3;
+            gameState.score = 0;
+            gameState.guesses = 0;
+            gameState.currentGuess = [];
+            gameState.countdownStartTime = Date.now();
+
+            document.getElementById('startBtn').disabled = true;
+            document.getElementById('resetBtn').disabled = true;
+
+            countdownLoop();
+        }
+
+        function countdownLoop() {
+            const elapsed = Math.floor((Date.now() - gameState.countdownStartTime) / 1000);
+            const current = Math.max(0, 3 - elapsed);
+
+            if (current > 0) {
+                document.getElementById('feedback').textContent = current.toString();
+                document.getElementById('feedback').style.fontSize = '32px';
+                playSound('type');
+                setTimeout(countdownLoop, 1000);
+            } else {
+                document.getElementById('feedback').style.fontSize = '';
+                gameState.countdownActive = false;
+                startGame();
+            }
+        }
+
+        function startGame() {
+            gameState.running = true;
+            gameState.timeLeft = gameConfig.timeLimit;
+            gameState.gameStartTime = Date.now();
+            gameState.guesses = 0;
+            gameState.score = 0;
+            gameState.currentGuess = [];
+            generateSecretCode();
+            updateDisplay();
+            gameLoop();
+        }
+
+        function gameLoop() {
+            const elapsed = Date.now() - gameState.gameStartTime;
+            gameState.timeLeft = Math.max(0, gameConfig.timeLimit - Math.floor(elapsed / 1000));
+
+            updateDisplay();
+
+            if (gameState.timeLeft <= 0 && gameState.running) {
+                endGame('⏰ TIME UP!');
+            } else if (gameState.running) {
+                requestAnimationFrame(gameLoop);
+            }
+        }
+
+        function updateDisplay() {
+            document.getElementById('scoreDisplay').textContent = gameState.score;
+            document.getElementById('guessDisplay').textContent = gameState.guesses + '/' + gameState.maxGuesses;
+            document.getElementById('timerDisplay').textContent = gameState.timeLeft + 's';
+
+            const timerEl = document.getElementById('timerDisplay');
+            if (gameState.timeLeft <= 10 && gameState.running) {
+                timerEl.classList.add('warning');
+            } else {
+                timerEl.classList.remove('warning');
+            }
+        }
+
+        function endGame(message) {
+            gameState.running = false;
+            document.getElementById('finalScore').textContent = gameState.score;
+            const resultText = gameState.score >= 300 ? '🎉 ELITE! GET STICKER!' :
+                               gameState.score >= 150 ? '🔥 GOOD HACK!' :
+                               gameState.score >= 50 ? '👍 NOT BAD!' : message;
+            document.getElementById('resultMessage').textContent = resultText;
+            document.getElementById('gameOverModal').classList.add('active');
+        }
+
+        document.getElementById('startBtn').addEventListener('click', startCountdown);
+
+        document.getElementById('resetBtn').addEventListener('click', () => {
+            gameState.running = false;
+            gameState.countdownActive = false;
+            gameState.currentGuess = [];
+            gameState.guesses = 0;
+            gameState.score = 0;
+            gameState.timeLeft = 60;
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('resetBtn').disabled = false;
+            document.getElementById('feedback').textContent = 'Enter 4-digit PIN!';
+            document.getElementById('feedback').style.fontSize = '';
+            updateCodeDisplay();
+            updateDisplay();
+        });
+
+        document.getElementById('saveScoreBtn').addEventListener('click', () => {
+            const name = document.getElementById('playerName').value.trim();
+            
+            if (name && name.length > 0) {
+                const scores = JSON.parse(localStorage.getItem('codeBreakerScores') || '[]');
+                scores.push({ name, score: gameState.score });
+                scores.sort((a, b) => b.score - a.score);
+                localStorage.setItem('codeBreakerScores', JSON.stringify(scores.slice(0, 10)));
+                updateLeaderboard();
+            }
+            
+            document.getElementById('gameOverModal').classList.remove('active');
+            document.getElementById('playerName').value = '';
+            document.getElementById('resetBtn').click();
+        });
+
+        function updateLeaderboard() {
+            const scores = JSON.parse(localStorage.getItem('codeBreakerScores') || '[]');
+            const list = document.getElementById('leaderboardList');
+            list.innerHTML = '';
+
+            if (scores.length === 0) {
+                list.innerHTML = '<li class="leaderboard-item" style="justify-content: center;"><span style="color: var(--color-neon);">No hacks yet</span></li>';
+            } else {
+                scores.forEach((entry, idx) => {
+                    const li = document.createElement('li');
+                    li.className = 'leaderboard-item';
+                    li.innerHTML = `
+                        <span style="color: var(--color-gold); font-weight: bold;">${idx + 1}.</span>
+                        <span>${entry.name}</span>
+                        <span style="color: var(--color-gold);">${entry.score}</span>
+                    `;
+                    list.appendChild(li);
+                });
+            }
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (!gameState.running || gameState.countdownActive) return;
+            
+            const num = parseInt(e.key);
+            if (!isNaN(num) && num >= 0 && num <= 9 && gameState.currentGuess.length < 4 && gameState.guesses < gameState.maxGuesses) {
+                gameState.currentGuess.push(num);
+                updateCodeDisplay();
+                playSound('type');
+            } else if (e.key === 'Enter' && gameState.currentGuess.length === 4) {
+                checkGuess();
+            } else if (e.key === 'Backspace' || e.key === 'Delete') {
+                gameState.currentGuess.pop();
+                updateCodeDisplay();
+            }
+        });
+
+        updateLeaderboard();
+        updateDisplay();
+        updateCodeDisplay();
+    </script>
+</body>
+</html>
