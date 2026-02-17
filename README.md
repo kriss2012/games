@@ -7,6 +7,8 @@ Welcome to the **games** repository! This project hosts a collection of simple b
 You can play the games live at the following links:
 
 - [StackRush Game](https://kriss2012.github.io/games/StackRush%20Game.html)  
+
+
 - [hack2](https://kriss2012.github.io/games/hack2.html)
 
 ## About
